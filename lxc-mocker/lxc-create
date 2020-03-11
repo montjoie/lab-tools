@@ -94,10 +94,12 @@ fi
 
 create_rootfs() {
 	echo "DEBUG: create_rootfs"
-	echo "DEBUG: mount /proc"
-	mount -t proc none /var/lib/lxc/${LXC_NAME}/rootfs/proc || exit $?
 	echo "DEBUG: debootstrap"
 	debootstrap --variant=minbase $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
+	if [ -e /proc/mounts ];then
+		echo "ERROR: debootstrap proc bug"
+		exit 1
+	fi
 	if [ "$PACKAGES" ] && [ "$QUIET" ]; then
 		echo "DEBUG: install $PACKAGES"
 	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q update > /dev/null 2>&1
