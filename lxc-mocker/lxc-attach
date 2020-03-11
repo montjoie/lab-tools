@@ -27,10 +27,18 @@ while getopts "n:v:" opt; do
     esac
 done
 
+if [ ! -e /var/lib/lxc/${LXC_NAME} ];then
+	echo "ERROR: ${LXC_NAME} does not exists"
+	exit 1
+fi
+
 if [ "$CMD" ]; then
-    # execute the given command
-    chroot /var/lib/lxc/${LXC_NAME}/rootfs $CMD
+	echo "DEBUG: lxc-attach-mocker in ${LXC_NAME}"
+	mount
+	# execute the given command
+	chroot /var/lib/lxc/${LXC_NAME}/rootfs $CMD
 else
     # when no commands are requested, open up a shell
     chroot /var/lib/lxc/${LXC_NAME}/rootfs /bin/bash
 fi
+exit $?

@@ -93,24 +93,25 @@ if [ -e /var/lib/lxc/cache/ ];then
 fi
 
 create_rootfs() {
-debootstrap --variant=minbase $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
-if [ "$PACKAGES" ] && [ "$QUIET" ]; then
-    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q update > /dev/null 2>&1
-    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q upgrade -y > /dev/null 2>&1
-    # install the requested packages.
-    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q install -y $PACKAGES > /dev/null 2>&1
-elif [ "$PACKAGES" ]; then
-    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get update
-    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get upgrade -y
-    # install the requested packages.
-    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get install -y $PACKAGES
-fi
+	echo "DEBUG: create_rootfs"
+	debootstrap --variant=minbase $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
+	if [ "$PACKAGES" ] && [ "$QUIET" ]; then
+	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q update > /dev/null 2>&1
+	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q upgrade -y > /dev/null 2>&1
+	    # install the requested packages.
+	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q install -y $PACKAGES > /dev/null 2>&1
+	elif [ "$PACKAGES" ]; then
+	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get update
+	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get upgrade -y
+	    # install the requested packages.
+	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get install -y $PACKAGES
+	fi
 
-case $RELEASE in
-	xenial)
-		echo "deb $MIRROR xenial main universe" > /var/lib/lxc/${LXC_NAME}/rootfs/etc/apt/sources.list
-	;;
-esac
+	case $RELEASE in
+		xenial)
+			echo "deb $MIRROR xenial main universe" > /var/lib/lxc/${LXC_NAME}/rootfs/etc/apt/sources.list
+		;;
+	esac
 }
 
 LXC_ROOTFS=/var/lib/lxc/${LXC_NAME}/rootfs
@@ -180,14 +181,21 @@ debian-cts)
 ;;
 esac
 
+echo "DEBUG: copy APT files to cache"
 mkdir -p /var/lib/lxc/cache
 rsync -a /var/lib/lxc/${LXC_NAME}/rootfs/var/cache/apt/archives/ /var/lib/lxc/cache/
 
 # BIG FAT TODO: handle errors
 # now mount /dev and /sys
-mount -t devtmpfs none /var/lib/lxc/${LXC_NAME}/rootfs/dev
-mount -t sysfs none /var/lib/lxc/${LXC_NAME}/rootfs/sys
+echo "DEBUG: mount /dev"
+mount -t devtmpfs none /var/lib/lxc/${LXC_NAME}/rootfs/dev || exit $?
+echo "DEBUG: mount /sys"
+mount -t sysfs none /var/lib/lxc/${LXC_NAME}/rootfs/sys || exit $?
 # java want it
-mount -t proc none /var/lib/lxc/${LXC_NAME}/rootfs/proc
+echo "DEBUG: mount /proc"
+mount -t proc none /var/lib/lxc/${LXC_NAME}/rootfs/proc || exit $?
+
+mount
+echo "lxc-create-mocker end"
 
 exit 0
