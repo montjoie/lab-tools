@@ -94,13 +94,18 @@ fi
 
 create_rootfs() {
 	echo "DEBUG: create_rootfs"
+	echo "DEBUG: mount /proc"
+	mount -t proc none /var/lib/lxc/${LXC_NAME}/rootfs/proc || exit $?
+	echo "DEBUG: debootstrap"
 	debootstrap --variant=minbase $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
 	if [ "$PACKAGES" ] && [ "$QUIET" ]; then
+		echo "DEBUG: install $PACKAGES"
 	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q update > /dev/null 2>&1
 	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q upgrade -y > /dev/null 2>&1
 	    # install the requested packages.
 	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get -q install -y $PACKAGES > /dev/null 2>&1
 	elif [ "$PACKAGES" ]; then
+		echo "DEBUG: install $PACKAGES"
 	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get update
 	    DEBIAN_FRONTEND=noninteractive chroot /var/lib/lxc/${LXC_NAME}/rootfs apt-get upgrade -y
 	    # install the requested packages.
@@ -112,6 +117,11 @@ create_rootfs() {
 			echo "deb $MIRROR xenial main universe" > /var/lib/lxc/${LXC_NAME}/rootfs/etc/apt/sources.list
 		;;
 	esac
+	echo "DEBUG: create_rootfs end"
+	umount /var/lib/lxc/${LXC_NAME}/rootfs/proc
+	mount
+
+	return 0
 }
 
 LXC_ROOTFS=/var/lib/lxc/${LXC_NAME}/rootfs
