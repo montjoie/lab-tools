@@ -80,6 +80,7 @@ if [ -z "$LXC_NAME" ];then
 	exit 1
 fi
 
+# TODO depends on that for avoiding the re-install
 echo "DEBUG: release $RELEASE"
 apt-get -y install debootstrap rsync lsof || exit $?
 
@@ -156,12 +157,21 @@ debian-cts)
 			psmisc \
 			openjdk-8-jdk-headless
 		if [ $? -ne 0 ];then
+			umount -f $LXC_ROOTFS/dev
+			umount -f $LXC_ROOTFS/proc
+			umount -f $LXC_ROOTFS/sys
 			exit 1
 		fi
 		umount -f $LXC_ROOTFS/dev
 		umount -f $LXC_ROOTFS/proc
 		umount -f $LXC_ROOTFS/sys
-		cp -a $LXC_ROOTFS /var/lib/lxc/template/$TEMPLATE || exit $?
+		cp -a $LXC_ROOTFS /var/lib/lxc/template/$TEMPLATE
+		if [ $? -ne 0 ];then
+			umount -f $LXC_ROOTFS/dev
+			umount -f $LXC_ROOTFS/proc
+			umount -f $LXC_ROOTFS/sys
+			exit 1
+		fi
 		ls -l /var/lib/lxc/template/
 	fi
 ;;
