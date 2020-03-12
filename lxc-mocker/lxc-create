@@ -95,7 +95,7 @@ fi
 create_rootfs() {
 	echo "DEBUG: create_rootfs"
 	echo "DEBUG: debootstrap"
-	fakechroot debootstrap --variant=fakechroot $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
+	debootstrap --variant=minbase $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
 	if [ ! -e /proc/mounts ];then
 		echo "ERROR: debootstrap proc bug"
 		exit 1
@@ -120,8 +120,12 @@ create_rootfs() {
 		;;
 	esac
 	echo "DEBUG: create_rootfs end"
-	umount /var/lib/lxc/${LXC_NAME}/rootfs/proc
-	mount
+	if [ ! -L /var/lib/lxc/${LXC_NAME}/rootfs/proc ];then
+		umount /var/lib/lxc/${LXC_NAME}/rootfs/proc
+		mount
+	else
+		echo "DEBUG: not unmounting proc it is a symlink"
+	fi
 
 	return 0
 }
@@ -196,6 +200,9 @@ esac
 echo "DEBUG: copy APT files to cache"
 mkdir -p /var/lib/lxc/cache
 rsync -a /var/lib/lxc/${LXC_NAME}/rootfs/var/cache/apt/archives/ /var/lib/lxc/cache/
+
+echo "DEBUG: will mount things"
+mount
 
 # BIG FAT TODO: handle errors
 # now mount /dev and /sys
