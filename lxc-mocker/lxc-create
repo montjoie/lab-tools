@@ -96,7 +96,7 @@ create_rootfs() {
 	echo "DEBUG: create_rootfs"
 	echo "DEBUG: debootstrap"
 	fakechroot debootstrap --variant=fakechroot $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
-	if [ -e /proc/mounts ];then
+	if [ ! -e /proc/mounts ];then
 		echo "ERROR: debootstrap proc bug"
 		exit 1
 	fi
