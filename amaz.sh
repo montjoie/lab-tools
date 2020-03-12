@@ -1,5 +1,9 @@
 #!/bin/sh
 
+print_help() {
+	echo "USAGE: $0 [-h][-b USBPATH][-p PORT][-a off/on/reset]"
+}
+
 CFG=""
 B_HUB=""
 while [ $# -ge 1 ];do
@@ -37,6 +41,11 @@ case $1 in
 	;;
 	esac
 ;;
+-b)
+	shift
+	B_HUB="$1"
+	shift
+;;
 *)
 	echo "ERROR: unknown arg $1"
 	exit 1
@@ -44,13 +53,15 @@ case $1 in
 esac
 done
 
-for devi in $(ls /sys/bus/usb/devices/*/manufacturer)
-do
-	grep -q VIA $devi
-	if [ $? -eq 0 ];then
-		B_HUB=$(echo $devi | cut -d'/' -f6 | sed 's,.4$,g,')
-	fi
-done
+if [ -z "$B_HUB" ];then
+	for devi in $(ls /sys/bus/usb/devices/*/manufacturer)
+	do
+		grep -q VIA $devi
+		if [ $? -eq 0 ];then
+			B_HUB=$(echo $devi | cut -d'/' -f6 | sed 's,.4$,g,')
+		fi
+	done
+fi
 
 if [ -z "$B_HUB" ];then
 	echo "ERROR: No compatible HUB found"
