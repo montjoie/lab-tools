@@ -82,7 +82,7 @@ fi
 
 # TODO depends on that for avoiding the re-install
 echo "DEBUG: release $RELEASE"
-apt-get -y install debootstrap rsync lsof || exit $?
+apt-get -y install debootstrap rsync lsof fakechroot || exit $?
 
 mkdir -p /var/lib/lxc/${LXC_NAME}/rootfs || exit $?
 
@@ -95,7 +95,7 @@ fi
 create_rootfs() {
 	echo "DEBUG: create_rootfs"
 	echo "DEBUG: debootstrap"
-	debootstrap --variant=minbase $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
+	fakechroot debootstrap --variant=fakechroot $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
 	if [ -e /proc/mounts ];then
 		echo "ERROR: debootstrap proc bug"
 		exit 1
