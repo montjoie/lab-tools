@@ -28,8 +28,13 @@ while getopts "s:i:n:" opt; do
     esac
 done
 
+# lxc-info accept to be called with lxcname as only one parameter
+if [ $# -eq 1 -a -z "$LXC_NAME" ];then
+	LXC_NAME=$1
+fi
+
 if [ -z "$LXC_NAME" ];then
-	echo "ERROR: no name"
+	echo "lxc-info: No container name specified"
 	exit 1
 fi
 
