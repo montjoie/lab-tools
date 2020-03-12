@@ -36,14 +36,14 @@ if [ "$LXC_NAME" ]; then
     sleep 2
     lsof /var/lib/lxc/${LXC_NAME}/rootfs/dev | grep "${LXC_NAME}/rootfs" | sed 's,[[:space:]][[:space:]]*, ,g' | cut -d' ' -f2 | xargs --no-run-if-empty kill -9
     lsof /var/lib/lxc/${LXC_NAME}/rootfs/sys | grep "${LXC_NAME}/rootfs" | sed 's,[[:space:]][[:space:]]*, ,g' | cut -d' ' -f2 | xargs --no-run-if-empty kill -9
-    umount /var/lib/lxc/${LXC_NAME}/rootfs/dev
+    umount -f /var/lib/lxc/${LXC_NAME}/rootfs/dev
     if [ $? -ne 0 ];then
 		echo "DEBUG: =============="
 		ps aux
 		echo "DEBUG: =============="
     fi
-    umount /var/lib/lxc/${LXC_NAME}/rootfs/proc
-    umount /var/lib/lxc/${LXC_NAME}/rootfs/sys
+    umount -f /var/lib/lxc/${LXC_NAME}/rootfs/proc
+    umount -f /var/lib/lxc/${LXC_NAME}/rootfs/sys
     # Remove lxc rootfs directory if any
     rm --one-file-system -rf /var/lib/lxc/${LXC_NAME}
     # echo container destroyed message
