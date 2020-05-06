@@ -52,6 +52,20 @@ do
 		RELEASE="$1"
 		shift
 	;;
+	--dist)
+		shift
+		case $1 in
+		debian)
+		;;
+		ubuntu)
+			MIRROR="http://mirror.ubuntu.ikoula.com/ubuntu/"
+		;;
+		*)
+			echo "ERROR: unknown dist $1"
+		;;
+		esac
+		shift
+	;;
 	-t)
 		shift
 		case $1 in
@@ -64,9 +78,9 @@ do
 		;;
 		*)
 			echo "ERROR: unknown template $1"
-			shift
 		;;
 		esac
+		shift
 	;;
 	*)
 		echo "DEBUG: skip $1"
@@ -98,6 +112,7 @@ create_rootfs() {
 	debootstrap --variant=minbase $RELEASE /var/lib/lxc/${LXC_NAME}/rootfs $MIRROR || exit $?
 	if [ ! -e /proc/mounts ];then
 		echo "ERROR: debootstrap proc bug"
+		mount -t proc none /proc
 		exit 1
 	fi
 	if [ "$PACKAGES" ] && [ "$QUIET" ]; then
