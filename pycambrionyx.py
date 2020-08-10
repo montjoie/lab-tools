@@ -9,6 +9,7 @@ import socket
 import re
 
 def disable_port(port):
+    ret = 0
     if args.debug:
         print("Disable port %d" % port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,11 +17,15 @@ def disable_port(port):
     sock.connect(("127.0.0.1", int(args.netport)))
     sock.send(b"disable %d" % port)
     res = sock.recv(1024)
-    print(res.decode("UTF8"))
+    rmsg = res.decode("UTF8")
+    if re.search("FAIL", rmsg):
+        ret = 1
+    print(rmsg)
     sock.close()
-    return 0
+    return ret
 
 def senable_port(port):
+    ret = 0
     if args.debug:
         print("SEnable port %d" % args.port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,11 +33,15 @@ def senable_port(port):
     sock.connect(("127.0.0.1", int(args.netport)))
     sock.send(b"senable %d" % port)
     res = sock.recv(1024)
-    print(res.decode("UTF8"))
+    rmsg = res.decode("UTF8")
+    if re.search("FAIL", rmsg):
+        ret = 1
+    print(rmsg)
     sock.close()
-    return 0
+    return ret
 
 def enable_port(port):
+    ret = 0
     if args.debug:
         print("Enable port %d" % args.port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,9 +49,12 @@ def enable_port(port):
     sock.connect(("127.0.0.1", int(args.netport)))
     sock.send(b"enable %d" % port)
     res = sock.recv(1024)
-    print(res.decode("UTF8"))
+    rmsg = res.decode("UTF8")
+    if re.search("FAIL", rmsg):
+        ret = 1
+    print(rmsg)
     sock.close()
-    return 0
+    return ret
 
 def cambrionix_daemon():
     ser = serial.Serial(args.name, 115200, timeout=1)
@@ -288,20 +300,25 @@ if args.timeout:
 if args.daemon:
     cambrionix_daemon()
 
+ret = 0
 if args.off:
-    disable_port(args.port)
+    ret = disable_port(args.port)
 if args.on:
-    enable_port(args.port)
+    ret = enable_port(args.port)
 if args.son:
-    senable_port(args.port)
+    ret = senable_port(args.port)
 if args.reset:
-    disable_port(args.port)
-    enable_port(args.port)
+    ret = disable_port(args.port)
+    if ret != 0:
+        sys.exit(ret)
+    ret = enable_port(args.port)
 if args.sreset:
-    disable_port(args.port)
-    senable_port(args.port)
+    ret = disable_port(args.port)
+    if ret != 0:
+        sys.exit(ret)
+    ret = senable_port(args.port)
 
-sys.exit(0)
+sys.exit(ret)
 
 # doc
 
