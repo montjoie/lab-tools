@@ -13,6 +13,7 @@ parser.add_argument("--name", "-n", type=str, help="tty name")
 parser.add_argument("--port", "-p", type=int, help="Cambrionix port to control")
 parser.add_argument("--netport", type=int, help="Nerwork port", default=12346)
 parser.add_argument("--resetcmd", type=str, help="reset")
+parser.add_argument("--baud", type=int, help="baud rate", default=115200)
 
 args = parser.parse_args()
 
@@ -46,7 +47,7 @@ while True:
         continue
     if not opened:
         try:
-            ser = serial.Serial(args.name, 115200, timeout=1)
+            ser = serial.Serial(args.name, args.baud, timeout=1)
             opened = True
             got_output = False
             serial_timeout = 10
