@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#echo "DEBUG: $0 fake"
+
+exit 0
+while getopts "qt:n:" opt; do
+    case $opt in
+        q)
+            QUIET=1
+            ;;
+        t)
+            TEMPLATE="$OPTARG"
+		echo "DEBUG: getopt TEMPLATE=$TEMPLATE"
+            ;;
+        n)
+            LXC_NAME="$OPTARG"
+		echo "DEBUG: getopt LXC_NAME=$LXC_NAME"
+            ;;
+        *)
+            ;;
+    esac
+done
+
+if [ -z "$LXC_NAME" ];then
+	echo "ERROR: need a LXC_NAME"
+	exit 1
+fi
+
+echo "DEBUG: fake start of $LXC_NAME"
+
+exit 0

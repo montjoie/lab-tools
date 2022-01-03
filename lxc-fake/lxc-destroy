@@ -1,0 +1,38 @@
+#!/bin/bash
+
+echo "DEBUG: $0 fake"
+while getopts "qt:n:" opt; do
+    case $opt in
+        q)
+            QUIET=1
+            ;;
+        t)
+            TEMPLATE="$OPTARG"
+		echo "DEBUG: getopt TEMPLATE=$TEMPLATE"
+            ;;
+        n)
+            LXC_NAME="$OPTARG"
+		echo "DEBUG: getopt LXC_NAME=$LXC_NAME"
+            ;;
+        *)
+            ;;
+    esac
+done
+
+if [ -z "$LXC_NAME" ];then
+	echo "ERROR: need a LXC_NAME"
+	exit 1
+fi
+
+find /var/lib/lxc/${LXC_NAME} -iname 'lava-[0-9]*' |
+while read line
+do
+	LAVA_NAME=$(basename $line)
+	echo "DEBUG: handle $line $LAVA_NAME"
+	echo "DEBUG: removing /$LAVA_NAME"
+	rm "/$LAVA_NAME"
+done
+
+rm -r "/var/lib/lxc/${LXC_NAME}/" || exit $?
+
+exit 0

@@ -1,0 +1,32 @@
+#!/bin/bash
+while getopts "s:i:n:" opt; do
+    case $opt in
+        n)
+            LXC_NAME="$OPTARG"
+            ;;
+        s)
+            STATUS=1
+            ;;
+        i)
+            IP=1
+            ;;
+        *)
+            ;;
+    esac
+done
+
+if [ -d /var/lib/lxc/${LXC_NAME} ]; then
+    if [ "$STATUS" ]; then
+        # echo running state.
+        echo "'$LXC_NAME' state is RUNNING"
+    fi
+
+    if [ "$IP" ]; then
+        # echo a dummy ip.
+        echo "'$LXC_NAME' IP address is: '0.0.0.0'"
+    fi
+    exit 0
+else
+    exit 1
+fi
+
