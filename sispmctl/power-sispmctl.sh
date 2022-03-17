@@ -1,15 +1,29 @@
 #!/bin/sh
 
+SERIAL=""
+SISPMCTL_OPTS=""
+
+help() {
+	echo "USAGE: $0 [reset|off|on] portnumber[1...4] [serialnumber]"
+}
+
 if [ $# -le 1 ];then
 	echo "ERROR: need more argument"
+	help()
 	exit 1
 fi
+
+if [ ! -z "$3" ];then
+	SERIAL="$3"
+	SISPMCTL_OPTS="-D $SERIAL"
+fi
+LOCKFILE='/tmp/sispmctl.lock'
 
 lock() {
 	TIMEOUT=0
 	while [ $TIMEOUT -le 40 ]
 	do
-		mkdir /tmp/sispmctl.lock 2>/dev/null
+		mkdir "$LOCKFILE" 2>/dev/null
 		if [ $? -eq 0 ];then
 			return 0
 		fi
@@ -22,27 +36,27 @@ lock() {
 }
 
 unlock() {
-	rmdir /tmp/sispmctl.lock
+	rmdir "$LOCKFILE"
 }
 
 case "$1" in
 reset)
 	lock || exit 1
-	sispmctl -f "$2"
+	sispmctl $SISPMCTL_OPTS -f "$2"
 	sleep 3
-	sispmctl -o "$2"
+	sispmctl $SISPMCTL_OPTS -o "$2"
 	unlock
 	exit 0
 ;;
 off)
 	lock || exit 1
-	sispmctl -f "$2"
+	sispmctl $SISPMCTL_OPTS -f "$2"
 	unlock
 	exit 0
 ;;
 on)
 	lock || exit 1
-	sispmctl -o "$2"
+	sispmctl $SISPMCTL_OPTS -o "$2"
 	unlock
 	exit 0
 ;;
