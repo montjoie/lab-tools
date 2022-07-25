@@ -8,6 +8,16 @@ import os
 import socket
 import re
 
+def dolog(slog):
+    print(slog)
+    if args.log is None:
+        return
+    flog = open(args.log, "a")
+    flog.write("======\n")
+    flog.write(slog)
+    flog.write("\n")
+    flog.close()
+
 def disable_port(port):
     ret = 0
     if args.debug:
@@ -97,6 +107,7 @@ def cambrionix_daemon():
     clients = []
     cmds = {}
     ports = {}
+    rebooted = False
     while True:
         if args.counterdir:
             ser.write(b"health\r\n")
@@ -145,6 +156,18 @@ def cambrionix_daemon():
             print(x)
             print(clients)
             print(cmds)
+        # check for errors
+        Cstate = x.decode('UTF8')
+        if re.search("E R D", Cstate):
+            if rebooted:
+                dolog("ERROR: already rebooted")
+                sys.exit(1)
+            dolog("ERROR: need to reboot")
+            ser.write(b"reboot\r\n")
+            rebooted = True
+            time.sleep(5.00)
+            # TODO reboot break serial, need to reopen
+            continue
         try:
             c, addr = s.accept()
             c.setblocking(0)
@@ -164,9 +187,24 @@ def cambrionix_daemon():
                     ser.write(b"state %s\r\n" % ports[client].encode())
                     x = ser.read(1024)
                     res = x.decode('UTF8').replace("  ", " ").split(" ")
+                    if res[0] == 'mode':
+                        if res[1] == 'o':
+                            res.pop(0)
+                            res.pop(0)
+                            res.pop(0)
+                        elif res[1] == 'c':
+                            res.pop(0)
+                            res.pop(0)
+                            res.pop(0)
+                            res.pop(0)
                     if res[0] != 'state':
-                        print("ERROR: Unexpected state")
+                        dolog("ERROR: Unexpected state %s" % res[0])
                         print(res)
+                        sres = ""
+                        for r in res:
+                            sres += r
+                            sres += "///"
+                        dolog(sres)
                         del cmds[client]
                         del ports[client]
                         client.send(b"FAIL: cannot find state\n")
@@ -284,6 +322,7 @@ parser.add_argument("--statedir", type=str, help="Where to store port state", de
 parser.add_argument("--startc", type=str, help="Port list to enable(charge) at start (comma separated)")
 parser.add_argument("--starts", type=str, help="Port list to enable(sync) at start (comma separated)")
 parser.add_argument("--startoff", type=str, help="Port list to disable at start (comma separated)")
+parser.add_argument("--log", type=str, help="logfile", default=None)
 
 args = parser.parse_args()
 

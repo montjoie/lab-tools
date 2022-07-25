@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 
-import serial
+"""
+redboot-proxy
+Fake a uboot for device which use redboot.
+"""
+
 import argparse
-import time
 import os
+import re
 import socket
 import subprocess
-import re
 import sys
+import time
+import serial
 
 # substract uboot header len
 def uboot_header(s):
@@ -26,7 +31,7 @@ args = parser.parse_args()
 
 s = socket.socket()
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-host = socket.gethostname()
+#host = socket.gethostname()
 print("DEBUG: listen on %d" % args.netport)
 s.bind(("0.0.0.0", args.netport))
 s.setblocking(0)
@@ -38,7 +43,7 @@ discard = 0
 serial_timeout = 0
 
 # phase:
-# 0 need to send uboot 
+# 0 need to send uboot
 # 1 waiting for uboot commands
 # 2 need to boot, send command to console
 # 3 pass though
