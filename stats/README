@@ -1,0 +1,26 @@
+* LAVA statistics
+
+
+** Quick howto
+```
+export LAVAURI=http://xxxxxxx
+./stats.py xxxxx
+./gnuplot.sh
+```
+
+** stats.py
+If you have a recent LAVA with (PR 1809) you can ran it with:
+./stats --start startjobid --end lastjobid
+This will scan all jobs between startjobid and lastjobid
+and generate lot of files which need to be handled by gnuplot.sh
+
+
+** provided statistics
+The result contains in index.html :
+- a table with basic numbers (TODO)
+- "waittime" graph for each devtype, (average time that a job wait to be ran). This is used to know which devtype need to be more present or have too many job
+- a job per days for the whole lab
+- a fiability graph (which devices have too many failure)
+
+The result contains in hc.html :
+- a per device graph showing bad/good healthchecks
