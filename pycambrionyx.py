@@ -24,7 +24,7 @@ def disable_port(port):
         print("Disable port %d" % port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(30)
-    sock.connect(("127.0.0.1", int(args.netport)))
+    sock.connect((args.nethost, int(args.netport)))
     sock.send(b"disable %d" % port)
     res = sock.recv(1024)
     rmsg = res.decode("UTF8")
@@ -40,7 +40,7 @@ def senable_port(port):
         print("SEnable port %d" % args.port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(30)
-    sock.connect(("127.0.0.1", int(args.netport)))
+    sock.connect((args.nethost, int(args.netport)))
     sock.send(b"senable %d" % port)
     res = sock.recv(1024)
     rmsg = res.decode("UTF8")
@@ -56,7 +56,7 @@ def enable_port(port):
         print("Enable port %d" % args.port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(30)
-    sock.connect(("127.0.0.1", int(args.netport)))
+    sock.connect((args.nethost, int(args.netport)))
     sock.send(b"enable %d" % port)
     res = sock.recv(1024)
     rmsg = res.decode("UTF8")
@@ -158,6 +158,8 @@ def cambrionix_daemon():
             print(cmds)
         # check for errors
         Cstate = x.decode('UTF8')
+        # TODO Invalid bootloader command
+        # TODO boot>>
         if re.search("E R D", Cstate):
             if rebooted:
                 dolog("ERROR: already rebooted")
@@ -316,7 +318,8 @@ parser.add_argument("--reset", action="store_true", help="reset port")
 parser.add_argument("--sreset", action="store_true", help="reset port")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--daemon", "-D", help="increase debug level", action="store_true")
-parser.add_argument("--netport", help="Nerwork port", default=12346)
+parser.add_argument("--netport", help="Network port", default=12346)
+parser.add_argument("--nethost", help="Network host", default="127.0.0.1")
 parser.add_argument("--counterdir", type=str, help="Where to store stats")
 parser.add_argument("--statedir", type=str, help="Where to store port state", default="/var/cambrionix/")
 parser.add_argument("--startc", type=str, help="Port list to enable(charge) at start (comma separated)")
