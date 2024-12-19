@@ -45,20 +45,23 @@ reset)
 	sispmctl $SISPMCTL_OPTS -f "$2"
 	sleep 3
 	sispmctl $SISPMCTL_OPTS -o "$2"
+	ret=$?
 	unlock
-	exit 0
+	exit $ret
 ;;
 off)
 	lock || exit 1
 	sispmctl $SISPMCTL_OPTS -f "$2"
+	ret=$?
 	unlock
-	exit 0
+	exit $ret
 ;;
 on)
 	lock || exit 1
 	sispmctl $SISPMCTL_OPTS -o "$2"
+	ret=$?
 	unlock
-	exit 0
+	exit $ret
 ;;
 *)
 	echo "ERROR: unknow command: $1"
