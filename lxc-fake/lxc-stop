@@ -2,6 +2,25 @@
 
 echo "DEBUG: $0 fake"
 
+# remove remains of LAVA
+sed -i "s,^export WORKER_NAME.*,," .bashrc
+sed -i 's,^export ANDROID_SERIAL.*,,' .bashrc
+sed -i 's,^export WIFI_.*,,' .bashrc
+sed -i 's,^export LOGLEVEL.*,,' .bashrc
+sed -i 's,^export LANG.*,,' .bashrc
+sed -i 's,^export INVOCATION_ID.*,,' .bashrc
+sed -i 's,^export JOURNAL_STREAM.*,,' .bashrc
+sed -i 's,^export URL.*,,' .bashrc
+sed -i 's,^export LANG.*,,' .bashrc
+sed -i 's,^export BOARD_IP.*,,' .bashrc
+sed -i 's,^export PATH.*,,' .bashrc
+sed -i 's,^export http_proxy.*,,' .bashrc
+sed -i 's,^export https_proxy.*,,' .bashrc
+sed -i 's,^export no_proxy.*,,' .bashrc
+cp .bashrc .bashrc.filtered
+grep -v '^$' .bashrc.filtered > .bashrc
+rm .bashrc.filtered
+
 exit 0
 while getopts "qt:n:" opt; do
     case $opt in
@@ -26,6 +45,6 @@ if [ -z "$LXC_NAME" ];then
 	exit 1
 fi
 
-echo "DEBUG: fake start of $LXC_NAME"
+echo "DEBUG: fake stop of $LXC_NAME"
 
 exit 0
